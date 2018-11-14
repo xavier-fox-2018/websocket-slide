@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Mesh Port</title>
+  <link href="./bootstrap.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1> Slide {{ position }} </h1>
+      <button id="minus" type="button" class="btn btn-outline-dark" @click="position--"><</button>
+      <button id="plus" type="button" class="btn btn-outline-dark" @click="position++">></button>
+    </div>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+
+  <script>
+  </script>
+  <script>
+    const socket = io.connect('http://localhost:3000');
+  </script>
+  
+  <script>
+    
+    new Vue({
+      el: '#app',
+      data: {
+        position: null
+      },
+      method: {
+
+      },
+      watch: {
+        position: function(newNumber, oldNumber) {
+          socket.emit('button', {
+            position: newNumber
+          })
+
+          socket.on('button', (data) => {
+            this.position = data.position
+            console.log(this.position)
+          })
+        }
+      },
+      created: function() {
+        socket.on('button',(data) => {
+          this.position = data.position
+        })
+      }
+    })
+
+  </script>
+</body>
+</html>
