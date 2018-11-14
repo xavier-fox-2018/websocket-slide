@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('server:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+let imgexp = ['https://n.nordstrommedia.com/id/90157a74-6d99-4f25-9b8d-a951bc3cf792.jpeg?crop=pad&pad_color=FFF&format=jpeg&trim=color&trimcolor=FFF&w=780&h=838&quality=70', 'https://n.nordstrommedia.com/id/6ce4c985-7837-4517-acd4-6085f39a0db8.jpeg?w=308&amp;h=308', 'https://n.nordstrommedia.com/id/7d8ea508-57cb-4d68-9870-7fdea3e357d1.jpeg?crop=pad&pad_color=FFF&format=jpeg&trim=color&trimcolor=FFF&w=780&h=838&quality=70']
+let imgnow = 0
+var io = require('socket.io').listen(server.listen(port));
+io.on('connection', function(socket){
+  io.emit('TES_SLIDE', imgexp[imgnow])
+  console.log('a user connected');
+  socket.on('INPUT_MSG', msg => {
+    console.log(`message: ${msg}`)
+  })
+  socket.on('nextSlide', () => {
+    if(imgnow < imgexp.length-1) {
+      imgnow ++
+      io.emit('TES_SLIDE', imgexp[imgnow])
+    }
+  })
+  socket.on('prevSlide', () => {
+    if(imgnow >0) {
+      imgnow --
+      io.emit('TES_SLIDE', imgexp[imgnow])
+    }
+  })
+});
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
