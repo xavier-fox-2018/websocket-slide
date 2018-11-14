@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+<body>
+  <div id="app">
+    <h1>{{message}}</h1>
+    <img :src="imgsrc" alt="haha"><br>
+    <button @click="prevSlide">prev</button>
+    <button @click="nextSlide">next</button>
+  </div>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue!',
+        textinput: '',
+        socket: io('http://localhost:3000/'),
+        imgsrc: ''
+      },
+      methods: {
+        sendtext () {
+          this.socket.emit('INPUT_MSG', this.textinput)
+          this.textinput = ''
+        },
+        nextSlide () {
+          this.socket.emit('nextSlide', {})
+          this.socket.on('TES_SLIDE', data => {
+            this.imgsrc = data
+          })
+        },
+        prevSlide () {
+          this.socket.emit('prevSlide', {})
+          this.socket.on('TES_SLIDE', data => {
+            this.imgsrc = data
+          })
+        }
+      },
+      mounted () {
+        this.socket.on('TES_SLIDE', data => {
+          console.log(data)
+          this.imgsrc = data
+        })
+      }
+    })
+  </script>
+</body>
+</html>
